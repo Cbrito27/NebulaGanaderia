@@ -36,47 +36,41 @@ export const obtenerGanadoPorId = async (id_ganado) => {
   }
 };
 
-// Crear un nuevo registro de ganado
-export const crearGanado = async (ganado) => {
-  try {
-    const {
-      codigo_marcacion,
-      nombre,
-      raza,
-      sexo,
-      fecha_naci,
-      estado_salud,
-      estado_repro,
-      peso_actual,
-      origen,
-      ventas_cod_venta,
-      raza_id_raza,
-    } = ganado;
 
+export const crearGanado = async (ganadoData) => {
+  try {
     const pool = await connectToDatabase();
-    await pool
-      .request()
-      .input("codigo_marcacion", sql.NVarChar(20), codigo_marcacion)
-      .input("nombre", sql.NVarChar(30), nombre)
-      .input("raza", sql.NVarChar(20), raza)
-      .input("sexo", sql.NVarChar(6), sexo)
-      .input("fecha_naci", sql.Date, fecha_naci)
-      .input("estado_salud", sql.NVarChar(30), estado_salud)
-      .input("estado_repro", sql.NVarChar(30), estado_repro)
-      .input("peso_actual", sql.Decimal(8, 2), peso_actual)
-      .input("origen", sql.NVarChar(50), origen)
-      .input("ventas_cod_venta", sql.Int, ventas_cod_venta)
-      .input("raza_id_raza", sql.Int, raza_id_raza)
+
+    // Si no hay ventas_cod_venta, le asignamos 0
+    const ventasCodVenta = ganadoData.ventas_cod_venta ?? 1;
+
+    const result = await pool.request()
+      .input("codigo_marcacion", sql.NVarChar(20), ganadoData.codigo_marcacion)
+      .input("nombre", sql.NVarChar(30), ganadoData.nombre)
+      .input("raza", sql.NVarChar(20), ganadoData.raza)
+      .input("sexo", sql.NVarChar(6), ganadoData.sexo)
+      .input("fecha_naci", sql.Date, ganadoData.fecha_naci)
+      .input("estado_salud", sql.NVarChar(30), ganadoData.estado_salud)
+      .input("estado_repro", sql.NVarChar(30), ganadoData.estado_repro)
+      .input("peso_actual", sql.Decimal(8, 2), ganadoData.peso_actual)
+      .input("origen", sql.NVarChar(50), ganadoData.origen)
+      .input("ventas_cod_venta", sql.Int, ventasCodVenta)
+      .input("raza_id_raza", sql.Int, ganadoData.raza_id_raza)
       .query(`
         INSERT INTO ganaderia.ganado 
-        (codigo_marcacion, nombre, raza, sexo, fecha_naci, estado_salud, estado_repro, peso_actual, origen, ventas_cod_venta, raza_id_raza)
-        VALUES (@codigo_marcacion, @nombre, @raza, @sexo, @fecha_naci, @estado_salud, @estado_repro, @peso_actual, @origen, @ventas_cod_venta, @raza_id_raza)
+        (codigo_marcacion, nombre, raza, sexo, fecha_naci, estado_salud, estado_repro, 
+         peso_actual, origen, ventas_cod_venta, raza_id_raza)
+        VALUES (@codigo_marcacion, @nombre, @raza, @sexo, @fecha_naci, @estado_salud, 
+                @estado_repro, @peso_actual, @origen, @ventas_cod_venta, @raza_id_raza)
       `);
 
-    return { message: "✅ Ganado creado correctamente" };
+    return { message: "Ganado creado correctamente" };
   } catch (error) {
-    console.error("❌ Error al crear ganado:", error);
-    throw error;
+    console.error("Error al crear el ganado:", error);
+    throw {
+      message: "Error al crear el ganado",
+      error,
+    };
   }
 };
 
