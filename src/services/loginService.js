@@ -54,6 +54,6 @@ export const loginServicio = async (correo, contrasenaIngresada) => {
     cod_empleado: usuario.cod_empleado,
     token,
   };
-
+  
   return data;
 };
